@@ -1,7 +1,8 @@
 #include "main.h"
-#include "logger.h"
 #include "cmsis_os.h"
-#include "stm32l4xx_hal_rtc.h"
+
+#include "logger.h"
+#include "sensor.h"
 
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
@@ -21,6 +22,13 @@ int main(void)
     MX_GPIO_Init();
     log_init();
 
+    log_write("");
+    log_write("-----------------------------------");
+    log_write("|        Device starting up       |");
+    log_write("-----------------------------------");
+
+    HAL_Delay(1000);
+    sensor_init();
     osKernelInitialize();
 
     defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
@@ -97,16 +105,17 @@ static void MX_GPIO_Init(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(LED_PIN_GPIO_Port, &GPIO_InitStruct);
+
 }
 
 void StartDefaultTask(void *argument)
 {
-    for (;;)
+    while (1)
     {
         HAL_GPIO_TogglePin(LED_PIN_GPIO_Port, LED_PIN_Pin);
-        
+
         log_write("Hello there!");
-        HAL_Delay(333);
+        HAL_Delay(1000);
     }
 }
 
