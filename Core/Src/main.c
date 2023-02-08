@@ -1,8 +1,7 @@
 #include "main.h"
 #include "logger.h"
 #include "cmsis_os.h"
-
-UART_HandleTypeDef huart2;
+#include "stm32l4xx_hal_rtc.h"
 
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
@@ -105,8 +104,9 @@ void StartDefaultTask(void *argument)
     for (;;)
     {
         HAL_GPIO_TogglePin(LED_PIN_GPIO_Port, LED_PIN_Pin);
-        log_write("Goodbye world\r\n");
-        osDelay(1000);
+        
+        log_write("Hello there!");
+        HAL_Delay(333);
     }
 }
 
@@ -120,31 +120,18 @@ void StartDefaultTask(void *argument)
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    /* USER CODE BEGIN Callback 0 */
-
-    /* USER CODE END Callback 0 */
     if (htim->Instance == TIM1)
     {
         HAL_IncTick();
     }
-    /* USER CODE BEGIN Callback 1 */
-
-    /* USER CODE END Callback 1 */
 }
 
-/**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
 void Error_Handler(void)
 {
-    /* USER CODE BEGIN Error_Handler_Debug */
-    /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
     while (1)
     {
     }
-    /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef USE_FULL_ASSERT

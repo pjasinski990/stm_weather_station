@@ -1,16 +1,20 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "stm32l4xx_hal.h"
 
 #include "logger.h"
 
 #define OUT_UART USART2
-#define OUT_BUFFER_SIZE 256
-#define BAUDRATE 115200
+#define OUT_BUFFER_SIZE 256U
+#define TIMEOUT 1000U
+#define BAUDRATE 115200U
 
 static UART_HandleTypeDef uart;
-static uint8_t output_buffer[OUT_BUFFER_SIZE];
+static RTC_HandleTypeDef rtc;
+
+static char output_buffer[OUT_BUFFER_SIZE];
 
 void log_init()
 {
@@ -26,13 +30,41 @@ void log_init()
     uart.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
     if (HAL_UART_Init(&uart) != HAL_OK)
     {
+        while(1);
+    }
+
+    rtc.Instance = RTC;
+    rtc.Init.HourFormat = RTC_HOURFORMAT_24;
+    rtc.Init.AsynchPrediv = 127;
+    rtc.Init.SynchPrediv = 255;
+    rtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+    rtc.Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
+    rtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+    rtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+    if (HAL_RTC_Init(&rtc) != HAL_OK)
+    {
+        while(1);
     }
 }
 
 void log_write(const char *format, ...) {
+    RTC_TimeTypeDef rtc_time;
+    HAL_RTC_GetTime(&rtc, &rtc_time, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&rtc, NULL, RTC_FORMAT_BIN);   // Must be called to unlock time values
+
+    uint16_t millis = (uint16_t)(999.0 - 1000.0 / rtc_time.SecondFraction * rtc_time.SubSeconds);
+    snprintf(output_buffer, OUT_BUFFER_SIZE, "[%02d:%02d:%02d:%03d] ", rtc_time.Hours, rtc_time.Minutes, rtc_time.Seconds, millis);
+
     va_list argp;
     va_start(argp, format);
-    vsnprintf(output_buffer, OUT_BUFFER_SIZE, format, argp);
-    HAL_UART_Transmit(&uart, output_buffer, OUT_BUFFER_SIZE, 1);
+    const char *after_date_q = output_buffer + strlen(output_buffer);
+    uint32_t bytes_left = OUT_BUFFER_SIZE - strlen(output_buffer) - 1;
+    vsnprintf(after_date_q, bytes_left, format, argp);
     va_end(argp);
+
+    output_buffer[OUT_BUFFER_SIZE - 3] = '\r';
+    output_buffer[OUT_BUFFER_SIZE - 2] = '\n';
+    output_buffer[OUT_BUFFER_SIZE - 1] = '\0';
+
+    HAL_UART_Transmit(&uart, (uint8_t*)output_buffer, OUT_BUFFER_SIZE, TIMEOUT);
 }
