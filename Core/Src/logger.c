@@ -56,7 +56,7 @@ void log_write(const char *format, ...)
 
     RTC_TimeTypeDef rtc_time;
     HAL_RTC_GetTime(&rtc, &rtc_time, RTC_FORMAT_BIN);
-    HAL_RTC_GetDate(&rtc, NULL, RTC_FORMAT_BIN); // Must be called to unlock time values
+    HAL_RTC_GetDate(&rtc, NULL, RTC_FORMAT_BIN); // must be called to unlock time values
 
     uint16_t millis = (uint16_t)(999.0 - 1000.0 / rtc_time.SecondFraction * rtc_time.SubSeconds);
     snprintf(output_buffer, OUT_BUFFER_SIZE, "[%02d:%02d:%02d:%03d] ", rtc_time.Hours, rtc_time.Minutes, rtc_time.Seconds, millis);

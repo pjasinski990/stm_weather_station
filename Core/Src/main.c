@@ -26,8 +26,8 @@ int main(void)
     log_write("-----------------------------------");
     log_write("|        Device starting up       |");
     log_write("-----------------------------------");
+    log_write("");
 
-    HAL_Delay(1000);
     sensor_init();
     osKernelInitialize();
 
