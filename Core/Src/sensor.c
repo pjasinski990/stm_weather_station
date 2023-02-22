@@ -175,8 +175,7 @@ void sensor_init()
     uint32_t n_samples = 0;
     
     bsec_library_return_t bsec_status = BSEC_OK;
-
-    bsec_iot_loop(app_delay, get_timestamp_us, output_ready, state_save, /* save intvl */ 5);
+    bsec_iot_loop(app_delay, get_timestamp_us, output_ready, state_save, /* save intvl */ 10000);
 }
 
 /*!
@@ -186,11 +185,10 @@ void sensor_init()
  */
 int64_t get_timestamp_us()
 {
-    int64_t system_current_time = 0;
     // ...
     // Please insert system specific function to retrieve a timestamp (in microseconds)
     // ...
-    return system_current_time;
+    return (int64_t)HAL_GetTick() * 1000;
 }
 
 /*!
@@ -220,6 +218,9 @@ void output_ready(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temp
                   float static_iaq, float stabStatus, float runInStatus, float co2_equivalent, float breath_voc_equivalent)
 {
     log_write("iaq %f, temp %f, humidity: %f", iaq, temperature, humidity);
+    log_write("iaq %lf, temp %lf, humidity: %lf", iaq, temperature, humidity);
+    log_write("iaq %d, temp %d, humidity: %d", iaq, temperature, humidity);
+    log_write("");
 }
 
 /*!
