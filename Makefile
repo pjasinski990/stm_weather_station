@@ -63,6 +63,7 @@ Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_exti.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c \
 Drivers/BME68x/bme68x.c \
+Drivers/bsec/src/bsec_integration.c \
 Core/Src/system_stm32l4xx.c \
 Core/Src/freertos.c \
 Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
