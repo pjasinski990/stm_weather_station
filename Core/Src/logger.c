@@ -68,16 +68,18 @@ void log_write(const char *format, ...)
     vsnprintf(after_date_q, bytes_left, format, argp);
     va_end(argp);
 
-    output_buffer[OUT_BUFFER_SIZE - 1] = '\0';
+    // buffer not filled completely, add newline at the end of the string
     if (strlen(output_buffer) < OUT_BUFFER_SIZE - 3)
     {
         output_buffer[strlen(output_buffer)] = '\r';
         output_buffer[strlen(output_buffer) + 1] = '\n';
     }
+    // buffer overflowing, add newline at the end of the buffer
     else
     {
         output_buffer[OUT_BUFFER_SIZE - 3] = '\r';
         output_buffer[OUT_BUFFER_SIZE - 2] = '\n';
+        output_buffer[OUT_BUFFER_SIZE - 1] = '\0';
     }
 
     HAL_UART_Transmit(&uart, (uint8_t *)output_buffer, OUT_BUFFER_SIZE, TIMEOUT);

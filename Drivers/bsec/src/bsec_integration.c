@@ -79,6 +79,7 @@
 #include <stdint.h>
 
 #include "bsec_integration.h"
+#include "logger.h"
 
 /**********************************************************************************************************************/
 /* local macro definitions */
@@ -535,12 +536,12 @@ void bsec_iot_loop(sleep_fct sleep, get_timestamp_us_fct get_timestamp_us, outpu
         {
             if (bsec_status < BSEC_OK)
             {
-                printf("ERROR: bsec_sensor_control: %d\n", bsec_status);
+                log_write("ERROR: bsec_sensor_control: %d\n", bsec_status);
                 break;
             }
             else
             {
-                printf("WARNING: bsec_sensor_control: %d\n", bsec_status);
+                log_write("WARNING: bsec_sensor_control: %d\n", bsec_status);
             }
         }
         /* Trigger a measurement if necessary */

@@ -11,6 +11,7 @@
 #define SENSOR_CS_PIN_Pin GPIO_PIN_7
 #define SENSOR_CS_PIN_GPIO_Port GPIOC
 #define SPI_TIMEOUT 1000U
+#define TEMPERATURE_OFFSET (-20)
 
 static SPI_HandleTypeDef spi;
 static struct bme68x_dev sensor_dev;
@@ -62,9 +63,10 @@ BME68X_INTF_RET_TYPE app_spi_write(uint8_t reg_addr, const uint8_t *reg_data, ui
     return res != HAL_OK;
 }
 
-void app_delay(uint32_t period, void *intf_ptr)
+void app_delay(uint32_t period_us, void *intf_ptr)
 {
-    HAL_Delay(period);
+    uint32_t period_millis = period_us / 1000u;
+    HAL_Delay(period_millis);
 }
 
 
@@ -75,9 +77,7 @@ void sensor_init()
     __HAL_RCC_GPIOC_CLK_ENABLE();
 
     // spi init
-    // miso C7
-    // mosi C3
-    // clk B10
+    // miso C7; mosi C3; clk B10
     log_write("Initializing SPI...");
     spi.Instance = SPI2;
     spi.Init.Mode = SPI_MODE_MASTER;
@@ -113,33 +113,8 @@ void sensor_init()
 
     // sensor init
     log_write("Initializing sensor...");
-    // sensor_dev.variant_id = 0;
-    // sensor_dev.intf = BME68X_SPI_INTF;
-    // sensor_dev.intf_ptr = &spi;
-    // sensor_dev.read = app_spi_read;
-    // sensor_dev.write =  app_spi_write;
-    // sensor_dev.delay_us = app_delay;
-    // sensor_dev.amb_temp = 24u;
-
-    // int8_t res = bme68x_init(&sensor_dev);
-
-    // if (res != BME68X_OK)
-    // {
-    //     log_write("in %s - Error initializing BME device (%d)", __func__, res);
-    //     while (1)
-    //         ;
-    // }
-
-    // res = bsec_init();
-    // if (res != BSEC_OK)
-    // {
-    //     log_write("in %s - Error initializing BSEC driver (%d)", __func__, res);
-    //     while (1)
-    //         ;
-    // }
-
     return_values_init ret;
-    ret = bsec_iot_init(BSEC_SAMPLE_RATE_LP, 0.0f, app_spi_write, app_spi_read, app_delay, state_load, config_load);
+    ret = bsec_iot_init(BSEC_SAMPLE_RATE_LP, TEMPERATURE_OFFSET, app_spi_write, app_spi_read, app_delay, state_load, config_load);
     if (ret.bme68x_status)
     {
         log_write("in %s - Error initializing BME device (%d)", __func__, ret.bme68x_status);
@@ -175,7 +150,7 @@ void sensor_init()
     uint32_t n_samples = 0;
     
     bsec_library_return_t bsec_status = BSEC_OK;
-    bsec_iot_loop(app_delay, get_timestamp_us, output_ready, state_save, /* save intvl */ 10000);
+    bsec_iot_loop(app_delay, get_timestamp_us, output_ready, state_save, save_intvl);
 }
 
 /*!
@@ -188,7 +163,7 @@ int64_t get_timestamp_us()
     // ...
     // Please insert system specific function to retrieve a timestamp (in microseconds)
     // ...
-    return (int64_t)HAL_GetTick() * 1000;
+    return (int64_t)(HAL_GetTick() * 1e3);
 }
 
 /*!
@@ -217,10 +192,20 @@ void output_ready(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temp
                   float pressure, float raw_temperature, float raw_humidity, float gas, float gas_percentage, bsec_library_return_t bsec_status,
                   float static_iaq, float stabStatus, float runInStatus, float co2_equivalent, float breath_voc_equivalent)
 {
-    log_write("iaq %f, temp %f, humidity: %f", iaq, temperature, humidity);
-    log_write("iaq %lf, temp %lf, humidity: %lf", iaq, temperature, humidity);
-    log_write("iaq %d, temp %d, humidity: %d", iaq, temperature, humidity);
-    log_write("");
+    UNUSED(iaq_accuracy);
+    UNUSED(raw_temperature);
+    UNUSED(raw_humidity);
+    UNUSED(gas);
+    UNUSED(gas_percentage);
+    UNUSED(static_iaq);
+    UNUSED(stabStatus);
+    UNUSED(runInStatus);
+    UNUSED(co2_equivalent);
+    UNUSED(breath_voc_equivalent);
+    if (bsec_status != BSEC_OK) {
+        log_write("ERROR - bsec status is %d", bsec_status);
+    }
+    log_write("[%ld] [%f] iaq %f, temp %f, humidity: %f", timestamp, stabStatus, iaq, raw_temperature, humidity);
 }
 
 /*!
