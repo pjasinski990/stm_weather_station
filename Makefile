@@ -64,6 +64,7 @@ Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c \
 Drivers/BME68x/bme68x.c \
 Drivers/bsec/src/bsec_integration.c \
+Drivers/bsec/src/config/generic_33v_300s_4d/bsec_serialized_configurations_iaq.c \
 Core/Src/system_stm32l4xx.c \
 Core/Src/freertos.c \
 Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
@@ -142,6 +143,7 @@ C_INCLUDES =  \
 -IDrivers/CMSIS/Include \
 -IDrivers/BME68x \
 -IDrivers/bsec/inc \
+-IDrivers/bsec/src/config \
 -IMiddlewares/Third_Party/FreeRTOS/Source/include \
 -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F

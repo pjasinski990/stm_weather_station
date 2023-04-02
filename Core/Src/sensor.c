@@ -7,15 +7,14 @@
 #include "bme68x.h"
 #include "bsec_interface.h"
 #include "bsec_integration.h"
+#include "generic_18v_300s_4d/bsec_serialized_configurations_iaq.h"
 
 #define SENSOR_CS_PIN_Pin GPIO_PIN_7
 #define SENSOR_CS_PIN_GPIO_Port GPIOC
 #define SPI_TIMEOUT 1000U
-#define TEMPERATURE_OFFSET (-20)
 
 static SPI_HandleTypeDef spi;
-static struct bme68x_dev sensor_dev;
-// static float bme68x_temperature_offset_g = 0.0f;
+static float bme68x_temperature_offset_g = 0.0f;
 
 
 int64_t get_timestamp_us();
@@ -114,7 +113,7 @@ void sensor_init()
     // sensor init
     log_write("Initializing sensor...");
     return_values_init ret;
-    ret = bsec_iot_init(BSEC_SAMPLE_RATE_LP, TEMPERATURE_OFFSET, app_spi_write, app_spi_read, app_delay, state_load, config_load);
+    ret = bsec_iot_init(BSEC_SAMPLE_RATE_LP, bme68x_temperature_offset_g, app_spi_write, app_spi_read, app_delay, state_load, config_load);
     if (ret.bme68x_status)
     {
         log_write("in %s - Error initializing BME device (%d)", __func__, ret.bme68x_status);
@@ -130,26 +129,8 @@ void sensor_init()
     log_write("OK");
 
     log_write("Looping:");
-    int64_t time_stamp = 0;
-    int64_t time_stamp_interval_ms = 0;
     uint32_t save_intvl = 5u;
     
-    /* Allocate enough memory for up to BSEC_MAX_PHYSICAL_SENSOR physical inputs*/
-    bsec_input_t bsec_inputs[BSEC_MAX_PHYSICAL_SENSOR];
-    
-    /* Number of inputs to BSEC */
-    uint8_t num_bsec_inputs = 0;
-    
-    /* BSEC sensor settings struct */
-    bsec_bme_settings_t sensor_settings;
-    
-    /* Save state variables */
-    uint8_t bsec_state[BSEC_MAX_STATE_BLOB_SIZE];
-    uint8_t work_buffer[BSEC_MAX_WORKBUFFER_SIZE];
-    uint32_t bsec_state_len = 0;
-    uint32_t n_samples = 0;
-    
-    bsec_library_return_t bsec_status = BSEC_OK;
     bsec_iot_loop(app_delay, get_timestamp_us, output_ready, state_save, save_intvl);
 }
 
@@ -204,8 +185,17 @@ void output_ready(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temp
     UNUSED(breath_voc_equivalent);
     if (bsec_status != BSEC_OK) {
         log_write("ERROR - bsec status is %d", bsec_status);
+        while (1)
+            ;
     }
-    log_write("[%ld] [%f] iaq %f, temp %f, humidity: %f", timestamp, stabStatus, iaq, raw_temperature, humidity);
+    log_write("STATS:");
+    log_write("\t\t* IAQ %.2f", iaq);
+    log_write("\t\t* TEMPERATURE %.2f", temperature);
+    log_write("\t\t* HUMIDITY: %.2f", humidity);
+    log_write("\t\t* PRESSURE: %.2f", pressure);
+    log_write("\t\t* GAS: %.2f", gas);
+    log_write("\t\t* CO2: %.2f", co2_equivalent);
+    log_write("\t\t* BREATH_VOC: %.2f", breath_voc_equivalent);
 }
 
 /*!
@@ -258,5 +248,6 @@ uint32_t config_load(uint8_t *config_buffer, uint32_t n_buffer)
     // Return zero if loading was unsuccessful or no config was available, 
     // otherwise return length of loaded config string.
     // ...
-    return 0;
+    memcpy(config_buffer, bsec_config_iaq, sizeof(bsec_config_iaq));
+    return sizeof(bsec_config_iaq);
 }
