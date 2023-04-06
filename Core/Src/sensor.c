@@ -150,7 +150,7 @@ int64_t get_timestamp_us()
 /*!
  * @brief           Handling of the ready outputs
  *
- * @param[in]       timestamp               time in milliseconds
+ * @param[in]       timestamp               time in nanoseconds
  * @param[in]       iaq                     IAQ
  * @param[in]       iaq_accuracy            IAQ accuracy
  * @param[in]       static_iaq              static IAQ
@@ -188,7 +188,7 @@ void output_ready(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temp
         while (1)
             ;
     }
-    log_write("STATS:");
+    log_write("[%.3f sec] - STATS:", (float)timestamp / 1e9);
     log_write("\t\t* IAQ %.2f", iaq);
     log_write("\t\t* TEMPERATURE %.2f", temperature);
     log_write("\t\t* HUMIDITY: %.2f", humidity);
