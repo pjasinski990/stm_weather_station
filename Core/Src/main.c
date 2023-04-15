@@ -3,17 +3,25 @@
 
 #include "logger.h"
 #include "sensor.h"
+#include "epaper.h"
 
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
+osThreadId_t default_task_handle;
+const osThreadAttr_t default_task_attributes = {
     .name = "defaultTask",
     .stack_size = 128 * 4,
     .priority = (osPriority_t)osPriorityNormal,
 };
 
+osThreadId_t sensor_task_handle;
+const osThreadAttr_t sensor_task_attributes = {
+    .name = "sensor_task",
+    .stack_size = 128 * 8,
+    .priority = (osPriority_t)osPriorityNormal,
+};
+
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-void StartDefaultTask(void *argument);
+void start_default_task(void *argument);
 
 int main(void)
 {
@@ -29,9 +37,13 @@ int main(void)
     log_write("");
 
     sensor_init();
+    epaper_init();
+    // start_sensor_loop_task(NULL);
     osKernelInitialize();
 
-    defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+    sensor_task_handle = osThreadNew(start_sensor_loop_task, NULL, &sensor_task_attributes);
+    default_task_handle = osThreadNew(start_default_task, NULL, &default_task_attributes);
+
     /* Start scheduler */
     osKernelStart();
 
@@ -63,6 +75,7 @@ void SystemClock_Config(void)
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
     RCC_OscInitStruct.HSIState = RCC_HSI_ON;
     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    RCC_OscInitStruct.LSIState = RCC_LSI_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
     RCC_OscInitStruct.PLL.PLLM = 1;
@@ -108,7 +121,7 @@ static void MX_GPIO_Init(void)
 
 }
 
-void StartDefaultTask(void *argument)
+void start_default_task(void *argument)
 {
     while (1)
     {

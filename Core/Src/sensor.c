@@ -77,7 +77,7 @@ void sensor_init()
 
     // spi init
     // miso C7; mosi C3; clk B10
-    log_write("Initializing SPI...");
+    log_write("initializing sensor spi");
     spi.Instance = SPI2;
     spi.Init.Mode = SPI_MODE_MASTER;
     spi.Init.Direction = SPI_DIRECTION_2LINES;
@@ -98,7 +98,7 @@ void sensor_init()
         while (1)
             ;
     }
-    log_write("OK");
+    log_write("sensor SPI OK");
 
     // cs C7
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -111,7 +111,7 @@ void sensor_init()
     HAL_GPIO_WritePin(SENSOR_CS_PIN_GPIO_Port, SENSOR_CS_PIN_Pin, GPIO_PIN_SET);
 
     // sensor init
-    log_write("Initializing sensor...");
+    log_write("initializing sensor");
     return_values_init ret;
     ret = bsec_iot_init(BSEC_SAMPLE_RATE_LP, bme68x_temperature_offset_g, app_spi_write, app_spi_read, app_delay, state_load, config_load);
     if (ret.bme68x_status)
@@ -126,49 +126,20 @@ void sensor_init()
         while (1)
             ;
     }
-    log_write("OK");
+    log_write("sensor OK");
+}
 
-    log_write("Looping:");
+void start_sensor_loop_task(void *arg) {
     uint32_t save_intvl = 5u;
-    
+    log_write("starting sensor loop:");
     bsec_iot_loop(app_delay, get_timestamp_us, output_ready, state_save, save_intvl);
 }
 
-/*!
- * @brief           Capture the system time in microseconds
- *
- * @return          system_current_time    current system timestamp in microseconds
- */
 int64_t get_timestamp_us()
 {
-    // ...
-    // Please insert system specific function to retrieve a timestamp (in microseconds)
-    // ...
     return (int64_t)(HAL_GetTick() * 1e3);
 }
 
-/*!
- * @brief           Handling of the ready outputs
- *
- * @param[in]       timestamp               time in nanoseconds
- * @param[in]       iaq                     IAQ
- * @param[in]       iaq_accuracy            IAQ accuracy
- * @param[in]       static_iaq              static IAQ
- * @param[in]       temperature             raw temperature
- * @param[in]       humidity                raw humidity
- * @param[in]       temperature             temperature
- * @param[in]       humidity                humidity
- * @param[in]       pressure                pressure
- * @param[in]       gas                     raw gas
- * @param[in]       gas_percentage          gas percentage
- * @param[in]       co2_equivalent          CO2 equivalent
- * @param[in]       breath_voc_equivalent   breath VOC equivalent
- * @param[in]       stabStatus              stabilization status
- * @param[in]       runInStatus             run in status
- * @param[in]       bsec_status             value returned by the bsec_do_steps() call
- *
- * @return          none
- */
 void output_ready(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temperature, float humidity,
                   float pressure, float raw_temperature, float raw_humidity, float gas, float gas_percentage, bsec_library_return_t bsec_status,
                   float static_iaq, float stabStatus, float runInStatus, float co2_equivalent, float breath_voc_equivalent)
@@ -232,22 +203,8 @@ void state_save(const uint8_t *state_buffer, uint32_t length)
     // ...
 }
  
-/*!
- * @brief           Load library config from non-volatile memory
- *
- * @param[in,out]   config_buffer    buffer to hold the loaded state string
- * @param[in]       n_buffer        size of the allocated state buffer
- *
- * @return          number of bytes copied to config_buffer
- */
 uint32_t config_load(uint8_t *config_buffer, uint32_t n_buffer)
 {
-    // ...
-    // Load a library config from non-volatile memory, if available.
-    //
-    // Return zero if loading was unsuccessful or no config was available, 
-    // otherwise return length of loaded config string.
-    // ...
     memcpy(config_buffer, bsec_config_iaq, sizeof(bsec_config_iaq));
     return sizeof(bsec_config_iaq);
 }
