@@ -5,22 +5,41 @@
 #include "sensor.h"
 #include "epaper.h"
 
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+
 osThreadId_t default_task_handle;
 const osThreadAttr_t default_task_attributes = {
-    .name = "defaultTask",
-    .stack_size = 128 * 4,
+    .stack_size = 1024,
     .priority = (osPriority_t)osPriorityNormal,
 };
 
 osThreadId_t sensor_task_handle;
 const osThreadAttr_t sensor_task_attributes = {
     .name = "sensor_task",
-    .stack_size = 128 * 8,
+    .stack_size = 1024,
     .priority = (osPriority_t)osPriorityNormal,
 };
 
-void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
+void led_task1(void *arg) {
+    uint32_t *delay = (uint32_t*)arg;
+    while (1)
+    {
+        HAL_GPIO_TogglePin(LED_PIN_GPIO_Port, LED_PIN_Pin);
+        log_write("this every 700 ms!");
+        osDelay(700);
+    }
+}
+void led_task2(void *arg) {
+    uint32_t *delay = (uint32_t*)arg;
+    while (1)
+    {
+        HAL_GPIO_TogglePin(LED_PIN_GPIO_Port, LED_PIN_Pin);
+        log_write("600 ms delay here");
+        osDelay(600);
+    }
+}
+
 void start_default_task(void *argument);
 
 int main(void)
@@ -28,8 +47,9 @@ int main(void)
     HAL_Init();
     SystemClock_Config();
     MX_GPIO_Init();
-    log_init();
+    osKernelInitialize();
 
+    log_init();
     log_write("");
     log_write("-----------------------------------");
     log_write("|        Device starting up       |");
@@ -38,11 +58,14 @@ int main(void)
 
     sensor_init();
     epaper_init();
-    // start_sensor_loop_task(NULL);
-    osKernelInitialize();
 
-    sensor_task_handle = osThreadNew(start_sensor_loop_task, NULL, &sensor_task_attributes);
     default_task_handle = osThreadNew(start_default_task, NULL, &default_task_attributes);
+    sensor_task_handle = osThreadNew(start_sensor_loop_task, NULL, &sensor_task_attributes);
+
+    osThreadId_t led1_thread_handle = osThreadNew(led_task1, NULL, &default_task_attributes);
+    osThreadId_t led2_thread_handle = osThreadNew(led_task2, NULL, &default_task_attributes);
+    UNUSED(led1_thread_handle);
+    UNUSED(led2_thread_handle);
 
     /* Start scheduler */
     osKernelStart();
@@ -128,7 +151,7 @@ void start_default_task(void *argument)
         HAL_GPIO_TogglePin(LED_PIN_GPIO_Port, LED_PIN_Pin);
 
         log_write("Hello there!");
-        HAL_Delay(1000);
+        osDelay(1000);
     }
 }
 
@@ -166,9 +189,6 @@ void Error_Handler(void)
  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-    /* USER CODE BEGIN 6 */
-    /* User can add his own implementation to report the file name and line number,
-       ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-    /* USER CODE END 6 */
+    log_write("Wrong parameters value: file %s on line %d\r\n", file, line);
 }
 #endif /* USE_FULL_ASSERT */

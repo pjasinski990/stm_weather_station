@@ -3,16 +3,25 @@
 #include <string.h>
 
 #include "stm32l4xx_hal.h"
+#include "cmsis_os2.h"
 
 #include "logger.h"
 
 #define OUT_UART USART2
-#define OUT_BUFFER_SIZE 256U
+#define OUT_BUFFER_SIZE 129U
 #define TIMEOUT 1000U
 #define BAUDRATE 115200U
 
 static UART_HandleTypeDef uart;
 static RTC_HandleTypeDef rtc;
+
+// static osMutexId_t uart_mutex_id;
+// static const osMutexAttr_t uart_mutex_attributes = {
+//     "uart_mutex",
+//     osMutexRobust,
+//     NULL,
+//     0U
+// };
 
 static char output_buffer[OUT_BUFFER_SIZE];
 
@@ -47,11 +56,18 @@ void log_init()
         while (1)
             ;
     }
+
+    // uart_mutex_id = osMutexNew(NULL);
+    // if (uart_mutex_id == NULL)
+    // {
+    //     log_write("error creating uart_mutex");
+    // }
     HAL_UART_Abort(&uart);
 }
 
 void log_write(const char *format, ...)
 {
+    // osMutexAcquire(uart_mutex_id, osWaitForever);
     memset(output_buffer, '\0', OUT_BUFFER_SIZE);
 
     RTC_TimeTypeDef rtc_time;
@@ -83,4 +99,5 @@ void log_write(const char *format, ...)
     }
 
     HAL_UART_Transmit(&uart, (uint8_t *)output_buffer, OUT_BUFFER_SIZE, TIMEOUT);
+    // osMutexRelease(uart_mutex_id);
 }

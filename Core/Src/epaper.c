@@ -16,7 +16,7 @@ void epaper_init() {
 
     // spi init
     // miso C7; mosi C3; clk B10
-    log_write("initalizing spi");
+    log_write("initalizing epaper spi");
     spi.Instance = SPI3;
     spi.Init.Mode = SPI_MODE_MASTER;
     spi.Init.Direction = SPI_DIRECTION_2LINES;
