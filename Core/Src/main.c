@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "sensor.h"
 #include "epaper.h"
+#include "EPD_Test.h"
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -39,6 +40,7 @@ int main(void)
 
     sensor_init();
     epaper_init();
+    EPD_test();
 
     default_task_handle = osThreadNew(start_default_task, NULL, &default_task_attributes);
     sensor_task_handle = osThreadNew(start_sensor_loop_task, NULL, &sensor_task_attributes);

@@ -5,8 +5,8 @@
 #define SENSOR_CS_GPIO_Port GPIOC
 #define SPI_TIMEOUT 1000U
 
-static SPI_HandleTypeDef sensor_spi_handle;
-static const float sensor_temperature_offset = 0.0f;
+extern SPI_HandleTypeDef sensor_spi_handle;
+extern const float sensor_temperature_offset;
 
 void sensor_init();
 void start_sensor_loop_task(void *arg);

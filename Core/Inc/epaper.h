@@ -11,6 +11,8 @@
 #define EPAPER_DC_Pin GPIO_PIN_0
 #define EPAPER_CS_Pin GPIO_PIN_2
 
+extern SPI_HandleTypeDef epaper_spi_handle;
+
 void epaper_init();
 
 #endif

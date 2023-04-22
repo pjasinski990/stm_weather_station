@@ -9,6 +9,9 @@
 #include "bsec_integration.h"
 #include "generic_18v_300s_4d/bsec_serialized_configurations_iaq.h"
 
+SPI_HandleTypeDef sensor_spi_handle;
+const float sensor_temperature_offset = 0.0f;
+
 int64_t get_timestamp_us();
 void output_ready(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temperature, float humidity,
      float pressure, float raw_temperature, float raw_humidity, float gas, float gas_percentage, bsec_library_return_t bsec_status,

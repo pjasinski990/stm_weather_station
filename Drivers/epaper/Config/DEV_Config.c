@@ -31,11 +31,11 @@
 ******************************************************************************/
 #include "DEV_Config.h"
 #include "stm32l4xx_hal.h"
+#include "epaper.h"
 
-extern SPI_HandleTypeDef hspi1;
 void DEV_SPI_WriteByte(UBYTE value)
 {
-    HAL_SPI_Transmit(&hspi1, &value, 1, 1000);
+    HAL_SPI_Transmit(&epaper_spi_handle, &value, 1, 1000);
 }
 
 int DEV_Module_Init(void)
