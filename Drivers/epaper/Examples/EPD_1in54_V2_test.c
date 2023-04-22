@@ -33,10 +33,10 @@
 
 int EPD_test(void)
 {
-    log_write("EPD_1in54_V2_test Demo\r\n");
+    log_write("EPD_1in54_V2_test Demo");
     DEV_Module_Init();
 
-    log_write("e-Paper Init and Clear...\r\n");
+    log_write("e-Paper Init and Clear...");
     EPD_1IN54_V2_Init();
     EPD_1IN54_V2_Clear();
     DEV_Delay_ms(500);
@@ -46,14 +46,14 @@ int EPD_test(void)
     /* you have to edit the startup_stm32fxxx.s file and set a big enough heap size */
     UWORD Imagesize = ((EPD_1IN54_V2_WIDTH % 8 == 0)? (EPD_1IN54_V2_WIDTH / 8 ): (EPD_1IN54_V2_WIDTH / 8 + 1)) * EPD_1IN54_V2_HEIGHT;
     if((BlackImage = (UBYTE *)malloc(Imagesize)) == NULL) {
-        log_write("Failed to apply for black memory...\r\n");
+        log_write("Failed to apply for black memory...");
         return -1;
     }
-    log_write("Paint_NewImage\r\n");
+    log_write("Paint_NewImage");
     Paint_NewImage(BlackImage, EPD_1IN54_V2_WIDTH, EPD_1IN54_V2_HEIGHT, 270, WHITE);
 
 #if 1   //show image for array    
-    log_write("show image for array\r\n");
+    log_write("show image for array");
     Paint_SelectImage(BlackImage);
     Paint_Clear(WHITE);
     Paint_DrawBitMap(gImage_1in54);
@@ -63,7 +63,7 @@ int EPD_test(void)
 #endif
 
 #if 1   // Drawing on the image
-    log_write("Drawing\r\n");
+    log_write("Drawing");
     //1.Select Image
     Paint_SelectImage(BlackImage);
     Paint_Clear(WHITE);
@@ -103,7 +103,7 @@ int EPD_test(void)
 
     // enter partial mode
 	EPD_1IN54_V2_Init_Partial();
-    log_write("Partial refresh\r\n");
+    log_write("Partial refresh");
     Paint_SelectImage(BlackImage);
     PAINT_TIME sPaint_time;
     sPaint_time.Hour = 12;
@@ -137,17 +137,17 @@ int EPD_test(void)
 
 #endif
 
-    log_write("Clear...\r\n");
+    log_write("Clear...");
     EPD_1IN54_V2_Init();
     EPD_1IN54_V2_Clear();
 
-    log_write("Goto Sleep...\r\n");
+    log_write("Goto Sleep...");
     EPD_1IN54_V2_Sleep();
     free(BlackImage);
     BlackImage = NULL;
 
     // close 5V
-    log_write("close 5V, Module enters 0 power consumption ...\r\n");
+    log_write("close 5V, Module enters 0 power consumption ...");
     DEV_Module_Exit();
     
     return 0;

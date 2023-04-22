@@ -8,11 +8,12 @@ SPI_HandleTypeDef epaper_spi_handle;
 void epaper_init() {
     log_write("initalizing epaper");
     // enable gpio ports
+    __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
 
     // spi init
-    // miso C7; mosi C3; clk B10
+    // miso C11; mosi C12; clk C10
     log_write("initalizing epaper spi");
     epaper_spi_handle.Instance = SPI3;
     epaper_spi_handle.Init.Mode = SPI_MODE_MASTER;
@@ -44,5 +45,6 @@ void epaper_init() {
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(EPAPER_CS_GPIO_Port, &GPIO_InitStruct);
-
+    HAL_GPIO_WritePin(EPAPER_CS_GPIO_Port, EPAPER_CS_Pin, GPIO_PIN_RESET);
+    
 }
