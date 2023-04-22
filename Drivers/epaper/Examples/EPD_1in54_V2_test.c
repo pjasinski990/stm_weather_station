@@ -52,7 +52,7 @@ int EPD_test(void)
     log_write("Paint_NewImage");
     Paint_NewImage(BlackImage, EPD_1IN54_V2_WIDTH, EPD_1IN54_V2_HEIGHT, 270, WHITE);
 
-#if 1   //show image for array    
+#if 0   //show image for array    
     log_write("show image for array");
     Paint_SelectImage(BlackImage);
     Paint_Clear(WHITE);
@@ -94,7 +94,7 @@ int EPD_test(void)
     DEV_Delay_ms(2000);
 #endif
 
-#if 1   //Partial refresh, example shows time    
+#if 0   //Partial refresh, example shows time    
 
     // The image of the previous frame must be uploaded, otherwise the
     // first few seconds will display an exception.
@@ -137,9 +137,9 @@ int EPD_test(void)
 
 #endif
 
-    log_write("Clear...");
-    EPD_1IN54_V2_Init();
-    EPD_1IN54_V2_Clear();
+    // log_write("Clear...");
+    // EPD_1IN54_V2_Init();
+    // EPD_1IN54_V2_Clear();
 
     log_write("Goto Sleep...");
     EPD_1IN54_V2_Sleep();

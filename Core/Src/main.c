@@ -31,7 +31,17 @@ int main(void)
 
     sensor_init();
     epaper_init();
-    EPD_test();
+
+    UBYTE *BlackImage;
+    UWORD Imagesize = ((EPD_1IN54_V2_WIDTH % 8 == 0)? (EPD_1IN54_V2_WIDTH / 8 ): (EPD_1IN54_V2_WIDTH / 8 + 1)) * EPD_1IN54_V2_HEIGHT;
+    BlackImage = (UBYTE *)malloc(Imagesize);
+    Paint_NewImage(BlackImage, EPD_1IN54_V2_WIDTH, EPD_1IN54_V2_HEIGHT, 270, WHITE);
+    Paint_SelectImage(BlackImage);
+    Paint_Clear(WHITE);
+    Paint_DrawString_EN(10, 10, "Hello world!", &Font20, WHITE, BLACK);
+    EPD_1IN54_V2_Display(BlackImage);
+
+    // EPD_test();
 
     sensor_task_handle = osThreadNew(start_sensor_loop_task, NULL, &sensor_task_attributes);
 

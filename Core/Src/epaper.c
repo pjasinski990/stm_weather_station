@@ -69,4 +69,9 @@ void epaper_init() {
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(EPAPER_CS_GPIO_Port, &GPIO_InitStruct);
+
+    DEV_Module_Init();
+    EPD_1IN54_V2_Init();
+    EPD_1IN54_V2_Clear();
+    osDelay(500);
 }
