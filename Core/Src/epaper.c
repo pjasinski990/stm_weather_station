@@ -3,9 +3,6 @@
 #include "epaper.h"
 #include "logger.h"
 
-#define EP_CS_PIN_Pin GPIO_PIN_2
-#define EP_CS_PIN_GPIO_Port GPIOD
-
 static SPI_HandleTypeDef spi;
 
 void epaper_init() {
@@ -41,10 +38,11 @@ void epaper_init() {
 
     // cs C7
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    HAL_GPIO_WritePin(EP_CS_PIN_GPIO_Port, EP_CS_PIN_Pin, GPIO_PIN_RESET);
-    GPIO_InitStruct.Pin = EP_CS_PIN_Pin;
+    HAL_GPIO_WritePin(EPAPER_CS_GPIO_Port, EPAPER_CS_Pin, GPIO_PIN_RESET);
+    GPIO_InitStruct.Pin = EPAPER_CS_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(EP_CS_PIN_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(EPAPER_CS_GPIO_Port, &GPIO_InitStruct);
+
 }

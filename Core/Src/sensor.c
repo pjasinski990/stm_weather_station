@@ -9,14 +9,6 @@
 #include "bsec_integration.h"
 #include "generic_18v_300s_4d/bsec_serialized_configurations_iaq.h"
 
-#define SENSOR_CS_PIN_Pin GPIO_PIN_7
-#define SENSOR_CS_PIN_GPIO_Port GPIOC
-#define SPI_TIMEOUT 1000U
-
-static SPI_HandleTypeDef spi;
-static float bme68x_temperature_offset_g = 0.0f;
-
-
 int64_t get_timestamp_us();
 void output_ready(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temperature, float humidity,
      float pressure, float raw_temperature, float raw_humidity, float gas, float gas_percentage, bsec_library_return_t bsec_status,
@@ -25,14 +17,12 @@ uint32_t state_load(uint8_t *state_buffer, uint32_t n_buffer);
 void state_save(const uint8_t *state_buffer, uint32_t length);
 uint32_t config_load(uint8_t *config_buffer, uint32_t n_buffer);
 
-
 BME68X_INTF_RET_TYPE app_spi_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t length, void *intf_ptr)
 {
-    SPI_HandleTypeDef *app_spi = (SPI_HandleTypeDef*)intf_ptr;
-    app_spi = &spi;
+    SPI_HandleTypeDef *app_spi = &sensor_spi_handle;
     uint8_t command = reg_addr | 0x80;
 
-    HAL_GPIO_WritePin(SENSOR_CS_PIN_GPIO_Port, SENSOR_CS_PIN_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(SENSOR_CS_GPIO_Port, SENSOR_CS_Pin, GPIO_PIN_RESET);
 
     HAL_StatusTypeDef res;
     res = HAL_SPI_Transmit(app_spi, &command, 1, SPI_TIMEOUT);
@@ -42,23 +32,22 @@ BME68X_INTF_RET_TYPE app_spi_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t 
     while (app_spi->State == HAL_SPI_STATE_BUSY)
         ;
 
-    HAL_GPIO_WritePin(SENSOR_CS_PIN_GPIO_Port, SENSOR_CS_PIN_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(SENSOR_CS_GPIO_Port, SENSOR_CS_Pin, GPIO_PIN_SET);
     return res != HAL_OK;
 }
 
 BME68X_INTF_RET_TYPE app_spi_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t length, void *intf_ptr)
 {
-    SPI_HandleTypeDef *app_spi = (SPI_HandleTypeDef*)intf_ptr;
-    app_spi = &spi;
+    SPI_HandleTypeDef *app_spi = &sensor_spi_handle;
     uint8_t command = reg_addr & 0x7F;
 
-    HAL_GPIO_WritePin(SENSOR_CS_PIN_GPIO_Port, SENSOR_CS_PIN_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(SENSOR_CS_GPIO_Port, SENSOR_CS_Pin, GPIO_PIN_RESET);
 
     HAL_StatusTypeDef res;
     res = HAL_SPI_Transmit(app_spi, &command, 1, SPI_TIMEOUT);
     res = HAL_SPI_Transmit(app_spi, (uint8_t *)reg_data, length, SPI_TIMEOUT);
 
-    HAL_GPIO_WritePin(SENSOR_CS_PIN_GPIO_Port, SENSOR_CS_PIN_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(SENSOR_CS_GPIO_Port, SENSOR_CS_Pin, GPIO_PIN_SET);
     return res != HAL_OK;
 }
 
@@ -78,42 +67,42 @@ void sensor_init()
     // spi init
     // miso C7; mosi C3; clk B10
     log_write("initializing sensor spi");
-    spi.Instance = SPI2;
-    spi.Init.Mode = SPI_MODE_MASTER;
-    spi.Init.Direction = SPI_DIRECTION_2LINES;
-    spi.Init.DataSize = SPI_DATASIZE_8BIT;
-    spi.Init.CLKPolarity = SPI_POLARITY_LOW;
-    spi.Init.CLKPhase = SPI_PHASE_1EDGE;
-    spi.Init.NSS = SPI_NSS_SOFT;
-    spi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
-    spi.Init.FirstBit = SPI_FIRSTBIT_MSB;
-    spi.Init.TIMode = SPI_TIMODE_DISABLE;
-    spi.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-    spi.Init.CRCPolynomial = 7;
-    spi.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-    spi.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-    if (HAL_SPI_Init(&spi) != HAL_OK)
+    sensor_spi_handle.Instance = SPI2;
+    sensor_spi_handle.Init.Mode = SPI_MODE_MASTER;
+    sensor_spi_handle.Init.Direction = SPI_DIRECTION_2LINES;
+    sensor_spi_handle.Init.DataSize = SPI_DATASIZE_8BIT;
+    sensor_spi_handle.Init.CLKPolarity = SPI_POLARITY_LOW;
+    sensor_spi_handle.Init.CLKPhase = SPI_PHASE_1EDGE;
+    sensor_spi_handle.Init.NSS = SPI_NSS_SOFT;
+    sensor_spi_handle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+    sensor_spi_handle.Init.FirstBit = SPI_FIRSTBIT_MSB;
+    sensor_spi_handle.Init.TIMode = SPI_TIMODE_DISABLE;
+    sensor_spi_handle.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+    sensor_spi_handle.Init.CRCPolynomial = 7;
+    sensor_spi_handle.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
+    sensor_spi_handle.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+    if (HAL_SPI_Init(&sensor_spi_handle) != HAL_OK)
     {
-        log_write("in %s - Error initializing SPI", __func__);
+        log_write("in %s - Error initializing sensor_spi_handle", __func__);
         while (1)
             ;
     }
-    log_write("sensor SPI OK");
+    log_write("sensor spi OK");
 
     // cs C7
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    HAL_GPIO_WritePin(SENSOR_CS_PIN_GPIO_Port, SENSOR_CS_PIN_Pin, GPIO_PIN_RESET);
-    GPIO_InitStruct.Pin = SENSOR_CS_PIN_Pin;
+    HAL_GPIO_WritePin(SENSOR_CS_GPIO_Port, SENSOR_CS_Pin, GPIO_PIN_RESET);
+    GPIO_InitStruct.Pin = SENSOR_CS_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(SENSOR_CS_PIN_GPIO_Port, &GPIO_InitStruct);
-    HAL_GPIO_WritePin(SENSOR_CS_PIN_GPIO_Port, SENSOR_CS_PIN_Pin, GPIO_PIN_SET);
+    HAL_GPIO_Init(SENSOR_CS_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(SENSOR_CS_GPIO_Port, SENSOR_CS_Pin, GPIO_PIN_SET);
 
     // sensor init
     log_write("initializing sensor");
     return_values_init ret;
-    ret = bsec_iot_init(BSEC_SAMPLE_RATE_LP, bme68x_temperature_offset_g, app_spi_write, app_spi_read, app_delay, state_load, config_load);
+    ret = bsec_iot_init(BSEC_SAMPLE_RATE_LP, sensor_temperature_offset, app_spi_write, app_spi_read, app_delay, state_load, config_load);
     if (ret.bme68x_status)
     {
         log_write("in %s - Error initializing BME device (%d)", __func__, ret.bme68x_status);

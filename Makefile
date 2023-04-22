@@ -66,6 +66,13 @@ Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c \
 Drivers/BME68x/bme68x.c \
 Drivers/bsec/src/bsec_integration.c \
 Drivers/bsec/src/config/generic_33v_300s_4d/bsec_serialized_configurations_iaq.c \
+Drivers/epaper/Config/DEV_Config.c \
+Drivers/epaper/ePaper/EPD_1in54_V2.c \
+Drivers/epaper/Examples/EPD_1in54_V2_test.c \
+Drivers/epaper/Examples/ImageData.c \
+Drivers/epaper/Examples/ImageData2.c \
+Drivers/epaper/Fonts/font12.c \
+Drivers/epaper/GUI/GUI_Paint.c \
 Core/Src/system_stm32l4xx.c \
 Core/Src/freertos.c \
 Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
@@ -145,6 +152,11 @@ C_INCLUDES =  \
 -IDrivers/BME68x \
 -IDrivers/bsec/inc \
 -IDrivers/bsec/src/config \
+-IDrivers/epaper/Config \
+-IDrivers/epaper/ePaper \
+-IDrivers/epaper/Examples \
+-IDrivers/epaper/Fonts \
+-IDrivers/epaper/GUI \
 -IMiddlewares/Third_Party/FreeRTOS/Source/include \
 -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F

@@ -21,25 +21,6 @@ const osThreadAttr_t sensor_task_attributes = {
     .priority = (osPriority_t)osPriorityNormal,
 };
 
-void led_task1(void *arg) {
-    uint32_t *delay = (uint32_t*)arg;
-    while (1)
-    {
-        HAL_GPIO_TogglePin(LED_PIN_GPIO_Port, LED_PIN_Pin);
-        log_write("this every 700 ms!");
-        osDelay(700);
-    }
-}
-void led_task2(void *arg) {
-    uint32_t *delay = (uint32_t*)arg;
-    while (1)
-    {
-        HAL_GPIO_TogglePin(LED_PIN_GPIO_Port, LED_PIN_Pin);
-        log_write("600 ms delay here");
-        osDelay(600);
-    }
-}
-
 void start_default_task(void *argument);
 
 int main(void)
@@ -61,11 +42,6 @@ int main(void)
 
     default_task_handle = osThreadNew(start_default_task, NULL, &default_task_attributes);
     sensor_task_handle = osThreadNew(start_sensor_loop_task, NULL, &sensor_task_attributes);
-
-    osThreadId_t led1_thread_handle = osThreadNew(led_task1, NULL, &default_task_attributes);
-    osThreadId_t led2_thread_handle = osThreadNew(led_task2, NULL, &default_task_attributes);
-    UNUSED(led1_thread_handle);
-    UNUSED(led2_thread_handle);
 
     /* Start scheduler */
     osKernelStart();
@@ -133,14 +109,14 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
     /*Configure GPIO pin Output Level */
-    HAL_GPIO_WritePin(LED_PIN_GPIO_Port, LED_PIN_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
-    /*Configure GPIO pin : LED_PIN_Pin */
-    GPIO_InitStruct.Pin = LED_PIN_Pin;
+    /*Configure GPIO pin : LED_Pin */
+    GPIO_InitStruct.Pin = LED_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(LED_PIN_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
 }
 
@@ -148,7 +124,7 @@ void start_default_task(void *argument)
 {
     while (1)
     {
-        HAL_GPIO_TogglePin(LED_PIN_GPIO_Port, LED_PIN_Pin);
+        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
         log_write("Hello there!");
         osDelay(1000);
