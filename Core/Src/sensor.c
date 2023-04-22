@@ -86,7 +86,7 @@ void sensor_init()
     sensor_spi_handle.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
     if (HAL_SPI_Init(&sensor_spi_handle) != HAL_OK)
     {
-        log_write("in %s - Error initializing sensor_spi_handle", __func__);
+        log_write("in %s - Error initializing spi", __func__);
         while (1)
             ;
     }

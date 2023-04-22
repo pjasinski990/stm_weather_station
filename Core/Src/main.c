@@ -15,6 +15,7 @@ const osThreadAttr_t sensor_task_attributes = {
     .priority = (osPriority_t)osPriorityNormal,
 };
 
+#include "EPD_1in54_V2.h"
 int main(void)
 {
     HAL_Init();

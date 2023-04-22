@@ -18,7 +18,7 @@ void epaper_init() {
     epaper_spi_handle.Instance = SPI3;
     epaper_spi_handle.Init.Mode = SPI_MODE_MASTER;
     epaper_spi_handle.Init.Direction = SPI_DIRECTION_2LINES;
-    epaper_spi_handle.Init.DataSize = SPI_DATASIZE_4BIT;
+    epaper_spi_handle.Init.DataSize = SPI_DATASIZE_8BIT;
     epaper_spi_handle.Init.CLKPolarity = SPI_POLARITY_LOW;
     epaper_spi_handle.Init.CLKPhase = SPI_PHASE_1EDGE;
     epaper_spi_handle.Init.NSS = SPI_NSS_SOFT;
@@ -37,14 +37,36 @@ void epaper_init() {
     }
     log_write("epaper spi OK");
 
-    // cs C7
     GPIO_InitTypeDef GPIO_InitStruct = {0};
+    // epaper busy C0
+    HAL_GPIO_WritePin(EPAPER_BUSY_GPIO_Port, EPAPER_BUSY_Pin, GPIO_PIN_RESET);
+    GPIO_InitStruct.Pin = EPAPER_BUSY_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(EPAPER_BUSY_GPIO_Port, &GPIO_InitStruct);
+
+    // epaper reset C1
+    HAL_GPIO_WritePin(EPAPER_RST_GPIO_Port, EPAPER_RST_Pin, GPIO_PIN_RESET);
+    GPIO_InitStruct.Pin = EPAPER_RST_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(EPAPER_RST_GPIO_Port, &GPIO_InitStruct);
+
+    // epaper data/command B0
+    HAL_GPIO_WritePin(EPAPER_DC_GPIO_Port, EPAPER_DC_Pin, GPIO_PIN_RESET);
+    GPIO_InitStruct.Pin = EPAPER_DC_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(EPAPER_DC_GPIO_Port, &GPIO_InitStruct);
+
+    // epaper cs D2
     HAL_GPIO_WritePin(EPAPER_CS_GPIO_Port, EPAPER_CS_Pin, GPIO_PIN_RESET);
     GPIO_InitStruct.Pin = EPAPER_CS_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(EPAPER_CS_GPIO_Port, &GPIO_InitStruct);
-    HAL_GPIO_WritePin(EPAPER_CS_GPIO_Port, EPAPER_CS_Pin, GPIO_PIN_RESET);
-    
 }
