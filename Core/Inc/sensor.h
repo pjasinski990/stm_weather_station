@@ -8,8 +8,19 @@
 extern SPI_HandleTypeDef sensor_spi_handle;
 extern const float sensor_temperature_offset;
 
-void sensor_init();
+typedef struct
+{
+    float timestamp;
+    float iaq;
+    float temperature;
+    float humidity;
+    float pressure;
+} sensor_reading_t;
 
+void sensor_init();
 void start_sensor_loop_task(void *arg);
+
+void store_new_reading(sensor_reading_t data);
+osStatus_t get_new_reading(sensor_reading_t *data_out);
 
 #endif

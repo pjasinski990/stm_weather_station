@@ -2,6 +2,7 @@
 
 #include "stm32l4xx_hal.h"
 
+#include "cmsis_os2.h"
 #include "logger.h"
 #include "sensor.h"
 #include "bme68x.h"
@@ -10,6 +11,7 @@
 #include "generic_18v_300s_4d/bsec_serialized_configurations_iaq.h"
 
 SPI_HandleTypeDef sensor_spi_handle;
+osMessageQueueId_t sensor_data_q;
 const float sensor_temperature_offset = 0.0f;
 
 int64_t get_timestamp_us();
@@ -118,6 +120,12 @@ void sensor_init()
         while (1)
             ;
     }
+
+    osMessageQueueAttr_t sensor_data_q_attr = {
+        .name = "sensor_data_queue"
+    };
+    sensor_data_q = osMessageQueueNew(16, sizeof(sensor_reading_t), &sensor_data_q_attr);
+
     log_write("sensor OK");
     log_write("");
 }
@@ -154,6 +162,15 @@ void output_ready(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temp
     log_write("\t\t* GAS: %.2f", gas);
     log_write("\t\t* CO2: %.2f", co2_equivalent);
     log_write("\t\t* BREATH_VOC: %.2f", breath_voc_equivalent);
+
+    sensor_reading_t new_reading = {
+        .timestamp = timestamp,
+        .iaq = iaq,
+        .temperature = temperature,
+        .humidity = humidity,
+        .pressure = pressure
+    };
+    store_new_reading(new_reading);
 }
 
 /*!
@@ -200,4 +217,16 @@ void start_sensor_loop_task(void *arg) {
     uint32_t save_intvl = 5u;
     log_write("starting sensor loop:");
     bsec_iot_loop(app_delay, get_timestamp_us, output_ready, state_save, save_intvl);
+}
+
+void store_new_reading(sensor_reading_t data) {
+    osStatus_t status = osMessageQueuePut(sensor_data_q, &data, 0, 0);
+    if (status != osOK) {
+        log_write("WARNING: sensor data queue store error");
+    }
+}
+
+osStatus_t get_new_reading(sensor_reading_t *data_out) {
+    osStatus_t status = osMessageQueueGet(sensor_data_q, data_out, NULL, 0);
+    return status;
 }
