@@ -1,9 +1,18 @@
 #include "stm32l4xx_hal.h"
 
+#include <stdlib.h>
+
+#include "cmsis_os.h"
 #include "epaper.h"
 #include "logger.h"
+#include "EPD_1in54_V2.h"
+#include "GUI_Paint.h"
+
+#define EPAPER_N_PIXELS (((EPD_1IN54_V2_WIDTH % 8 == 0)? (EPD_1IN54_V2_WIDTH / 8 ): (EPD_1IN54_V2_WIDTH / 8 + 1)) * EPD_1IN54_V2_HEIGHT)
 
 SPI_HandleTypeDef epaper_spi_handle;
+
+static UBYTE *frame_buffer;
 
 void epaper_init() {
     log_write("initalizing epaper");
@@ -70,8 +79,57 @@ void epaper_init() {
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(EPAPER_CS_GPIO_Port, &GPIO_InitStruct);
 
+    frame_buffer = malloc(sizeof(UBYTE) * EPAPER_N_PIXELS);
+    if (frame_buffer == NULL) {
+        log_write("error allocating %d bytes for epaper frame buffer", sizeof(UBYTE) * EPAPER_N_PIXELS);
+        while (1)
+            ;
+    }
+    Paint_NewImage(frame_buffer, EPD_1IN54_V2_WIDTH, EPD_1IN54_V2_HEIGHT, 270, WHITE);
+    Paint_SelectImage(frame_buffer);
+    log_write("epaper OK");
+    log_write("");
+}
+
+void epaper_deinit() {
+    free(frame_buffer);
+    frame_buffer = NULL;
+}
+
+void epaper_begin() {
+    log_write("resetting epaper");
     DEV_Module_Init();
+
+    log_write("epaper init and clear");
     EPD_1IN54_V2_Init();
     EPD_1IN54_V2_Clear();
-    osDelay(500);
+    DEV_Delay_ms(500);
+
+    // clear frame buffer
+    Paint_Clear(WHITE);
+}
+
+void epaper_begin_partial() {
+    log_write("epaper partial display activate");
+    EPD_1IN54_V2_DisplayPartBaseImage(frame_buffer);
+    EPD_1IN54_V2_Init_Partial();
+}
+
+void epaper_clear() {
+    EPD_1IN54_V2_Init();
+    EPD_1IN54_V2_Clear();
+}
+
+void epaper_end() {
+    EPD_1IN54_V2_Init();
+    log_write("epaper sleep");
+    EPD_1IN54_V2_Sleep();
+    log_write("close vcc, epaper entering low power");
+    DEV_Module_Exit();
+}
+
+void epaper_draw_text(UBYTE xbegin, UBYTE ybegin, sFONT *font, const char *text) {
+    log_write("display text: %s", text);
+    Paint_DrawString_EN(xbegin, ybegin, text, font, WHITE, BLACK);
+    EPD_1IN54_V2_Display(frame_buffer);
 }

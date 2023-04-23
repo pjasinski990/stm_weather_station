@@ -119,6 +119,7 @@ void sensor_init()
             ;
     }
     log_write("sensor OK");
+    log_write("");
 }
 
 void start_sensor_loop_task(void *arg) {

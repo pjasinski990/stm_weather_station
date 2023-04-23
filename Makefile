@@ -71,8 +71,10 @@ Drivers/epaper/ePaper/EPD_1in54_V2.c \
 Drivers/epaper/Examples/EPD_1in54_V2_test.c \
 Drivers/epaper/Examples/ImageData.c \
 Drivers/epaper/Examples/ImageData2.c \
-Drivers/epaper/Fonts/font12CN.c \
+Drivers/epaper/Fonts/font12.c \
+Drivers/epaper/Fonts/font16.c \
 Drivers/epaper/Fonts/font20.c \
+Drivers/epaper/Fonts/font12CN.c \
 Drivers/epaper/Fonts/font24CN.c \
 Drivers/epaper/GUI/GUI_Paint.c \
 Core/Src/system_stm32l4xx.c \

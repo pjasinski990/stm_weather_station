@@ -15,7 +15,6 @@ const osThreadAttr_t sensor_task_attributes = {
     .priority = (osPriority_t)osPriorityNormal,
 };
 
-#include "EPD_1in54_V2.h"
 int main(void)
 {
     HAL_Init();
@@ -23,26 +22,25 @@ int main(void)
     osKernelInitialize();
 
     log_init();
-    log_write("");
-    log_write("-----------------------------------");
+    log_write("***********************************");
     log_write("|        Device starting up       |");
-    log_write("-----------------------------------");
+    log_write("***********************************");
     log_write("");
 
     sensor_init();
+
     epaper_init();
+    epaper_begin();
+    epaper_draw_text(10, 10, &Font12, "is there anybody out there?");
+    epaper_draw_text(10, 30, &Font12, "is there anybody out there?");
+    epaper_draw_text(10, 50, &Font12, "is there anybody out there?");
+    epaper_end();
+    epaper_draw_text(10, 70, &Font12, "is there anybody out there?");
+    epaper_begin();
+    epaper_draw_text(10, 100, &Font12, "is there anybody out there?");
+    epaper_end();
 
-    UBYTE *BlackImage;
-    UWORD Imagesize = ((EPD_1IN54_V2_WIDTH % 8 == 0)? (EPD_1IN54_V2_WIDTH / 8 ): (EPD_1IN54_V2_WIDTH / 8 + 1)) * EPD_1IN54_V2_HEIGHT;
-    BlackImage = (UBYTE *)malloc(Imagesize);
-    Paint_NewImage(BlackImage, EPD_1IN54_V2_WIDTH, EPD_1IN54_V2_HEIGHT, 270, WHITE);
-    Paint_SelectImage(BlackImage);
-    Paint_Clear(WHITE);
-    Paint_DrawString_EN(10, 10, "Hello world!", &Font20, WHITE, BLACK);
-    EPD_1IN54_V2_Display(BlackImage);
-
-    // EPD_test();
-
+    log_write("done with epaper");
     sensor_task_handle = osThreadNew(start_sensor_loop_task, NULL, &sensor_task_attributes);
 
     /* Start scheduler */

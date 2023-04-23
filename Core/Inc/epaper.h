@@ -11,8 +11,16 @@
 #define EPAPER_DC_Pin GPIO_PIN_0
 #define EPAPER_CS_Pin GPIO_PIN_2
 
+#include "fonts.h"
+
 extern SPI_HandleTypeDef epaper_spi_handle;
 
 void epaper_init();
+void epaper_deinit();
+void epaper_begin();
+void epaper_begin_partial();
+void epaper_end();
+
+void epaper_draw_text(uint8_t xbegin, uint8_t ybegin, sFONT *font, const char *text);
 
 #endif
