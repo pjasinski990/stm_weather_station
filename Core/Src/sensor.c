@@ -122,12 +122,6 @@ void sensor_init()
     log_write("");
 }
 
-void start_sensor_loop_task(void *arg) {
-    uint32_t save_intvl = 5u;
-    log_write("starting sensor loop:");
-    bsec_iot_loop(app_delay, get_timestamp_us, output_ready, state_save, save_intvl);
-}
-
 int64_t get_timestamp_us()
 {
     return (int64_t)(HAL_GetTick() * 1e3);
@@ -200,4 +194,10 @@ uint32_t config_load(uint8_t *config_buffer, uint32_t n_buffer)
 {
     memcpy(config_buffer, bsec_config_iaq, sizeof(bsec_config_iaq));
     return sizeof(bsec_config_iaq);
+}
+
+void start_sensor_loop_task(void *arg) {
+    uint32_t save_intvl = 5u;
+    log_write("starting sensor loop:");
+    bsec_iot_loop(app_delay, get_timestamp_us, output_ready, state_save, save_intvl);
 }

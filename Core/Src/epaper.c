@@ -2,17 +2,19 @@
 
 #include <stdlib.h>
 
-#include "cmsis_os.h"
+#include "cmsis_os2.h"
 #include "epaper.h"
 #include "logger.h"
 #include "EPD_1in54_V2.h"
 #include "GUI_Paint.h"
 
 #define EPAPER_N_PIXELS (((EPD_1IN54_V2_WIDTH % 8 == 0)? (EPD_1IN54_V2_WIDTH / 8 ): (EPD_1IN54_V2_WIDTH / 8 + 1)) * EPD_1IN54_V2_HEIGHT)
+#define EPAPER_REFRESH_DELAY 5000
 
 SPI_HandleTypeDef epaper_spi_handle;
 
 static UBYTE *frame_buffer;
+static uint16_t n_refreshes;
 
 void epaper_init() {
     log_write("initalizing epaper");
@@ -131,7 +133,19 @@ void epaper_update() {
     EPD_1IN54_V2_Display(frame_buffer);
 }
 
-void epaper_draw_text(UBYTE xbegin, UBYTE ybegin, sFONT *font, const char *text) {
+void epaper_draw_text(uint8_t xbegin, uint8_t ybegin, sFONT *font, const char *text) {
     log_write("display text: %s", text);
     Paint_DrawString_EN(xbegin, ybegin, text, font, WHITE, BLACK);
+}
+
+void start_epaper_loop_task(void *arg) {
+    log_write("starting epaper task");
+    while (1) {
+        epaper_begin();
+        Paint_Clear(WHITE);
+        Paint_DrawNum(100, 100, ++n_refreshes, &Font20, BLACK, WHITE);
+        epaper_update();
+        epaper_end();
+        osDelay(EPAPER_REFRESH_DELAY);
+    }
 }

@@ -9,6 +9,7 @@ extern SPI_HandleTypeDef sensor_spi_handle;
 extern const float sensor_temperature_offset;
 
 void sensor_init();
+
 void start_sensor_loop_task(void *arg);
 
 #endif

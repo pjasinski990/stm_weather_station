@@ -1,5 +1,5 @@
 #include "main.h"
-#include "cmsis_os.h"
+#include "cmsis_os2.h"
 
 #include "logger.h"
 #include "sensor.h"
@@ -11,6 +11,12 @@ void SystemClock_Config(void);
 osThreadId_t sensor_task_handle;
 const osThreadAttr_t sensor_task_attributes = {
     .name = "sensor_task",
+    .stack_size = 4096,
+    .priority = (osPriority_t)osPriorityNormal,
+};
+osThreadId_t epaper_task_handle;
+const osThreadAttr_t epaper_task_attributes = {
+    .name = "epaper_task",
     .stack_size = 2048,
     .priority = (osPriority_t)osPriorityNormal,
 };
@@ -30,22 +36,11 @@ int main(void)
     sensor_init();
     epaper_init();
 
-    epaper_begin();
-    epaper_draw_text(10, 10, &Font12, "is there anybody out there?");
-    epaper_draw_text(10, 30, &Font12, "is there anybody out there?");
-    epaper_draw_text(10, 50, &Font12, "is there anybody out there?");
-    epaper_update();
-    epaper_end();
-
+    epaper_task_handle = osThreadNew(start_epaper_loop_task, NULL, &epaper_task_attributes);
     sensor_task_handle = osThreadNew(start_sensor_loop_task, NULL, &sensor_task_attributes);
 
     /* Start scheduler */
     osKernelStart();
-
-    /* We should never get here as control is now taken by the scheduler */
-    while (1)
-    {
-    }
 }
 
 /**
