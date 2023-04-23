@@ -10,7 +10,7 @@
 #include "GUI_Paint.h"
 
 #define EPAPER_N_PIXELS (((EPD_1IN54_V2_WIDTH % 8 == 0)? (EPD_1IN54_V2_WIDTH / 8 ): (EPD_1IN54_V2_WIDTH / 8 + 1)) * EPD_1IN54_V2_HEIGHT)
-#define EPAPER_REFRESH_DELAY 60000
+#define EPAPER_REFRESH_DELAY 20000
 
 SPI_HandleTypeDef epaper_spi_handle;
 
@@ -168,10 +168,10 @@ void start_epaper_loop_task(void *arg) {
         if (has_new_data) {
             log_write("new data from sensor");
             // write sensor data
-            Paint_DrawNum(values_x, 36 + border + 0 * y_space, data.temperature, &Font12, BLACK, WHITE);
-            Paint_DrawNum(values_x, 36 + border + 1 * y_space, data.humidity, &Font12, BLACK, WHITE);
-            Paint_DrawNum(values_x, 36 + border + 2 * y_space, data.pressure, &Font12, BLACK, WHITE);
-            Paint_DrawNum(values_x, 28 + border + 3 * y_space, data.iaq, &Font12, BLACK, WHITE);
+            Paint_DrawNumDecimals(values_x, 36 + border + 0 * y_space, data.temperature, &Font12, 1, BLACK, WHITE);
+            Paint_DrawNumDecimals(values_x, 36 + border + 1 * y_space, data.humidity, &Font12, 1, BLACK, WHITE);
+            Paint_DrawNumDecimals(values_x, 36 + border + 2 * y_space, data.pressure / 100, &Font12, 1, BLACK, WHITE);
+            Paint_DrawNumDecimals(values_x, 28 + border + 3 * y_space, data.iaq, &Font12, 1, BLACK, WHITE);
         }
 
         epaper_update();
