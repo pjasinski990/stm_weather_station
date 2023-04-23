@@ -21,6 +21,7 @@ void epaper_begin();
 void epaper_begin_partial();
 void epaper_end();
 
+void epaper_update();
 void epaper_draw_text(uint8_t xbegin, uint8_t ybegin, sFONT *font, const char *text);
 
 #endif

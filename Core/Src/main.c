@@ -28,19 +28,15 @@ int main(void)
     log_write("");
 
     sensor_init();
-
     epaper_init();
+
     epaper_begin();
     epaper_draw_text(10, 10, &Font12, "is there anybody out there?");
     epaper_draw_text(10, 30, &Font12, "is there anybody out there?");
     epaper_draw_text(10, 50, &Font12, "is there anybody out there?");
-    epaper_end();
-    epaper_draw_text(10, 70, &Font12, "is there anybody out there?");
-    epaper_begin();
-    epaper_draw_text(10, 100, &Font12, "is there anybody out there?");
+    epaper_update();
     epaper_end();
 
-    log_write("done with epaper");
     sensor_task_handle = osThreadNew(start_sensor_loop_task, NULL, &sensor_task_attributes);
 
     /* Start scheduler */

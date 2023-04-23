@@ -85,8 +85,12 @@ void epaper_init() {
         while (1)
             ;
     }
+    // create, select and clear frame buffer
     Paint_NewImage(frame_buffer, EPD_1IN54_V2_WIDTH, EPD_1IN54_V2_HEIGHT, 270, WHITE);
     Paint_SelectImage(frame_buffer);
+    Paint_Clear(WHITE);
+    DEV_Module_Init();
+
     log_write("epaper OK");
     log_write("");
 }
@@ -96,17 +100,10 @@ void epaper_deinit() {
     frame_buffer = NULL;
 }
 
+// wake epaper for writing
 void epaper_begin() {
-    log_write("resetting epaper");
-    DEV_Module_Init();
-
-    log_write("epaper init and clear");
+    log_write("epaper init for writing");
     EPD_1IN54_V2_Init();
-    EPD_1IN54_V2_Clear();
-    DEV_Delay_ms(500);
-
-    // clear frame buffer
-    Paint_Clear(WHITE);
 }
 
 void epaper_begin_partial() {
@@ -116,20 +113,25 @@ void epaper_begin_partial() {
 }
 
 void epaper_clear() {
-    EPD_1IN54_V2_Init();
+    log_write("epaper clear");
     EPD_1IN54_V2_Clear();
+    DEV_Delay_ms(500);
 }
 
+// put epaper to sleep and power off
 void epaper_end() {
-    EPD_1IN54_V2_Init();
     log_write("epaper sleep");
     EPD_1IN54_V2_Sleep();
     log_write("close vcc, epaper entering low power");
     DEV_Module_Exit();
 }
 
+void epaper_update() {
+    log_write("%s", "refreshing epaper");
+    EPD_1IN54_V2_Display(frame_buffer);
+}
+
 void epaper_draw_text(UBYTE xbegin, UBYTE ybegin, sFONT *font, const char *text) {
     log_write("display text: %s", text);
     Paint_DrawString_EN(xbegin, ybegin, text, font, WHITE, BLACK);
-    EPD_1IN54_V2_Display(frame_buffer);
 }
