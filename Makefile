@@ -74,8 +74,6 @@ Drivers/epaper/Examples/ImageData2.c \
 Drivers/epaper/Fonts/font12.c \
 Drivers/epaper/Fonts/font16.c \
 Drivers/epaper/Fonts/font20.c \
-Drivers/epaper/Fonts/font12CN.c \
-Drivers/epaper/Fonts/font24CN.c \
 Drivers/epaper/GUI/GUI_Paint.c \
 Core/Src/system_stm32l4xx.c \
 Core/Src/freertos.c \
