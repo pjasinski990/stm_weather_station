@@ -138,25 +138,27 @@ void epaper_draw_text(uint8_t xbegin, uint8_t ybegin, sFONT *font, const char *t
     Paint_DrawString_EN(xbegin, ybegin, text, font, WHITE, BLACK);
 }
 
-#include "weather_icons.h"
+#include "weather_icons_32x32.h"
 void start_epaper_loop_task(void *arg) {
     log_write("starting epaper task");
 
     int border = 0;
-    int icon_dim = 48;
-    int icon_padding_right = -6;
-    int y_space = icon_dim + 4;
+    int n_icons = 4;
+    int icon_dim = 32;
+    int icon_padding_right = 0;
+    int y_space = (EPD_1IN54_V2_HEIGHT - 2*border - icon_dim*(n_icons)) / (n_icons - 1) + icon_dim;
     int values_x = border + icon_dim + icon_padding_right;
+    sFONT font = Font12;
 
     while (1) {
         epaper_begin();
         Paint_Clear(WHITE);
 
         // draw icons
-        Paint_DrawBitMap_Paste(epd_bitmap_temperature, border, border + 0 * y_space, icon_dim, icon_dim, 0);
-        Paint_DrawBitMap_Paste(epd_bitmap_humidity,    border, border + 1 * y_space, icon_dim, icon_dim, 0);
-        Paint_DrawBitMap_Paste(epd_bitmap_pressure,    border, border + 2 * y_space, icon_dim, icon_dim, 0);
-        Paint_DrawBitMap_Paste(epd_bitmap_iaq,         border, border + 3 * y_space, icon_dim, icon_dim, 0);
+        Paint_DrawBitMap_Paste(epd_bitmap_temperature_32x32, border, border + 0 * y_space, icon_dim, icon_dim, 0);
+        Paint_DrawBitMap_Paste(epd_bitmap_humidity_32x32,    border, border + 1 * y_space, icon_dim, icon_dim, 0);
+        Paint_DrawBitMap_Paste(epd_bitmap_pressure_32x32,    border, border + 2 * y_space, icon_dim, icon_dim, 0);
+        Paint_DrawBitMap_Paste(epd_bitmap_iaq_32x32,         border, border + 3 * y_space, icon_dim, icon_dim, 0);
 
         uint8_t has_new_data = 0;
         sensor_reading_t data;
@@ -168,10 +170,10 @@ void start_epaper_loop_task(void *arg) {
         if (has_new_data) {
             log_write("new data from sensor");
             // write sensor data
-            Paint_DrawNumDecimals(values_x, 36 + border + 0 * y_space, data.temperature, &Font12, 1, BLACK, WHITE);
-            Paint_DrawNumDecimals(values_x, 36 + border + 1 * y_space, data.humidity, &Font12, 1, BLACK, WHITE);
-            Paint_DrawNumDecimals(values_x, 36 + border + 2 * y_space, data.pressure / 100, &Font12, 1, BLACK, WHITE);
-            Paint_DrawNumDecimals(values_x, 28 + border + 3 * y_space, data.iaq, &Font12, 1, BLACK, WHITE);
+            Paint_DrawNumDecimals(values_x, icon_dim - font.Height + border + 0 * y_space, data.temperature, &Font12, 1, BLACK, WHITE);
+            Paint_DrawNumDecimals(values_x, icon_dim - font.Height + border + 1 * y_space, data.humidity, &Font12, 1, BLACK, WHITE);
+            Paint_DrawNumDecimals(values_x, icon_dim - font.Height + border + 2 * y_space, data.pressure / 100, &Font12, 1, BLACK, WHITE);
+            Paint_DrawNumDecimals(values_x, icon_dim - font.Height + border + 3 * y_space, data.iaq, &Font12, 1, BLACK, WHITE);
         }
 
         epaper_update();
