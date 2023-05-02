@@ -1,0 +1,3 @@
+[submodule "Middlewares/Third_Party/CMSIS_5"]
+	path = Middlewares/Third_Party/CMSIS_5
+	url = https://github.com/ARM-software/CMSIS_5.git
