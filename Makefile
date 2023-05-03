@@ -76,20 +76,27 @@ Drivers/epaper/Fonts/font16.c \
 Drivers/epaper/Fonts/font20.c \
 Drivers/epaper/GUI/GUI_Paint.c \
 Core/Src/system_stm32l4xx.c \
-Core/Src/freertos.c \
-Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
-Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
-Middlewares/Third_Party/FreeRTOS/Source/list.c \
-Middlewares/Third_Party/FreeRTOS/Source/queue.c \
-Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c \
-Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
-Middlewares/Third_Party/FreeRTOS/Source/timers.c \
-Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c \
-Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c \
-Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
 Core/Src/stm32l4xx_hal_timebase_tim.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi_ex.c
+
+ifndef USE_FREERTOS
+C_SOURCES += \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS/RTX/SRC/rt_CMSIS.c
+else
+C_SOURCES +=  \
+	Core/Src/freertos.c \
+	Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
+	Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
+	Middlewares/Third_Party/FreeRTOS/Source/list.c \
+	Middlewares/Third_Party/FreeRTOS/Source/queue.c \
+	Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c \
+	Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
+	Middlewares/Third_Party/FreeRTOS/Source/timers.c \
+	Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c \
+	Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c \
+	Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c
+endif
 
 # ASM sources
 ASM_SOURCES =  \
@@ -159,10 +166,20 @@ C_INCLUDES =  \
 -IDrivers/epaper/Examples \
 -IDrivers/epaper/Fonts \
 -IDrivers/epaper/GUI \
--IMiddlewares/Third_Party/FreeRTOS/Source/include \
--IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
--IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
 
+ifndef USE_FREERTOS
+C_INCLUDES += \
+	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/Core/Include \
+	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/Include \
+	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Include \
+	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Config \
+	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Library/IAR/IDE/
+else
+C_INCLUDES += \
+	-IMiddlewares/Third_Party/FreeRTOS/Source/include \
+	-IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
+	-IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
+endif
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
