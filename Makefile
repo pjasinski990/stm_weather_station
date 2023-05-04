@@ -82,7 +82,22 @@ Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi_ex.c
 
 ifndef USE_FREERTOS
 C_SOURCES += \
-	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS/RTX/SRC/rt_CMSIS.c
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/Source/os_tick_ptim.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/Source/os_systick.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Config/RTX_Config.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_lib.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_system.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_kernel.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_thread.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_msgqueue.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_delay.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_memory.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_evr.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_evflags.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_timer.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_mutex.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_semaphore.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_mempool.c
 else
 C_SOURCES +=  \
 	Core/Src/freertos.c \
@@ -145,7 +160,8 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DUSE_HAL_DRIVER \
--DSTM32L476xx
+-DSTM32L476xx \
+-DARMCM4_FP
 
 
 # AS includes
@@ -173,7 +189,9 @@ C_INCLUDES += \
 	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/Include \
 	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Include \
 	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Config \
-	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Library/IAR/IDE/
+	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Library/IAR/IDE \
+	-IMiddlewares/Third_Party/CMSIS_5/Device/ARM/ARMCM4/Include
+
 else
 C_INCLUDES += \
 	-IMiddlewares/Third_Party/FreeRTOS/Source/include \
