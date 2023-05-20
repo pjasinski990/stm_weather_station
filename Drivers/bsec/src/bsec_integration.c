@@ -273,7 +273,7 @@ static void bme68x_bsec_trigger_measurement(bsec_bme_settings_t *sensor_settings
 		meas_period = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme68x_g) + heatr_conf.heatr_dur*1000;
 		
 		/* Delay till the measurement is ready. Timestamp resolution in ms */
-        sleep((uint32_t)meas_period, bme68x_g.intf_ptr);       
+        sleep((uint32_t)meas_period, bme68x_g.intf_ptr);
     }
     
     /* Call the API to get current operation mode of the sensor */
@@ -526,6 +526,7 @@ void bsec_iot_loop(sleep_fct sleep, get_timestamp_us_fct get_timestamp_us, outpu
 
     while (1)
     {
+        log_write("bsec_iot_loop");
         /* get the timestamp in nanoseconds before calling bsec_sensor_control() */
         time_stamp = get_timestamp_us() * 1000;
         

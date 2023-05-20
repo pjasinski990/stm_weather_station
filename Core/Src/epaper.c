@@ -178,6 +178,7 @@ void start_epaper_loop_task(void *arg) {
 
         epaper_update();
         epaper_end();
+        log_write("epaper task going to sleep for %dms", EPAPER_REFRESH_DELAY);
         osDelay(EPAPER_REFRESH_DELAY);
     }
 }

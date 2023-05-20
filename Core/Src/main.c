@@ -24,7 +24,9 @@ const osThreadAttr_t epaper_task_attributes = {
 int main(void)
 {
     HAL_Init();
+
     SystemClock_Config();
+    NVIC_SetPriority(SysTick_IRQn, 0x0); // set RTOS interrupt priority to highest possible
     osKernelInitialize();
 
     log_init();
@@ -36,11 +38,17 @@ int main(void)
     sensor_init();
     epaper_init();
 
+    log_write("starting epaper thread");
     epaper_task_handle = osThreadNew(start_epaper_loop_task, NULL, &epaper_task_attributes);
+    log_write("starting sensor thread");
     sensor_task_handle = osThreadNew(start_sensor_loop_task, NULL, &sensor_task_attributes);
 
-    /* Start scheduler */
-    osKernelStart();
+    // /* Start scheduler */
+    osStatus_t err = osKernelStart();
+    if (err != osOK) {
+        log_write("Failed to start scheduler");
+        Error_Handler();
+    }
 }
 
 /**

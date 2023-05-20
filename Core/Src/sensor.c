@@ -59,7 +59,7 @@ BME68X_INTF_RET_TYPE app_spi_write(uint8_t reg_addr, const uint8_t *reg_data, ui
 void app_delay(uint32_t period_us, void *intf_ptr)
 {
     uint32_t period_millis = period_us / 1000u;
-    HAL_Delay(period_millis);
+    osDelay(period_millis);
 }
 
 

@@ -40,6 +40,7 @@ Core/Src/main.c \
 Core/Src/logger.c \
 Core/Src/sensor.c \
 Core/Src/epaper.c \
+Core/Src/sysfunc_stubs.c \
 Core/Src/stm32l4xx_it.c \
 Core/Src/stm32l4xx_hal_msp.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rtc.c \
@@ -117,6 +118,12 @@ endif
 ASM_SOURCES =  \
 startup_stm32l476xx.s
 
+ifndef USE_FREERTOS
+ASM_SOURCES +=  \
+test.s
+# Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/GCC/irq_armv7m.s
+endif
+
 
 #######################################
 # binaries
@@ -165,7 +172,8 @@ C_DEFS =  \
 
 
 # AS includes
-AS_INCLUDES = 
+AS_INCLUDES = \
+-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Include
 
 # C includes
 C_INCLUDES =  \
