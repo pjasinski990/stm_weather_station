@@ -22,7 +22,11 @@ TARGET = weather_station
 # debug build?
 DEBUG = 1
 # optimization
-OPT = -Og
+ifeq ($(DEBUG), 1)
+OPT = -O0
+else
+OPT = -O3
+endif
 
 
 #######################################
