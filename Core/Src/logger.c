@@ -12,18 +12,15 @@
 #define TIMEOUT 10U
 #define BAUDRATE 115200U
 
-static UART_HandleTypeDef uart;
-static RTC_HandleTypeDef rtc;
+UART_HandleTypeDef uart;
+RTC_HandleTypeDef rtc;
 
-static osMutexId_t uart_mutex_id;
-static const osMutexAttr_t uart_mutex_attributes = {
-    "uart_mutex",
-    osMutexRobust,
-    NULL,
-    0U
-};
+osMutexId_t uart_mutex_id;
 
-static char output_buffer[OUT_BUFFER_SIZE];
+static void uart_clear_terminal() {
+    char buff[] = {27, '[', '2', 'J'};
+    HAL_UART_Transmit(&uart, (uint8_t *)&buff, 4, TIMEOUT);
+}
 
 void log_init()
 {
@@ -57,50 +54,46 @@ void log_init()
             ;
     }
 
-    uart_mutex_id = osMutexNew(&uart_mutex_attributes);
+    uart_mutex_id = osMutexNew(NULL);
     if (uart_mutex_id == NULL)
     {
         log_write("error creating uart_mutex");
+        while (1);
     }
-    HAL_UART_Abort(&uart);
+    uart_clear_terminal();
 }
 
 void log_write(const char *format, ...)
 {
-    // if (osMutexAcquire(uart_mutex_id, osWaitForever) == osOK) {
-        memset(output_buffer, '\0', OUT_BUFFER_SIZE);
+    char output_buffer[OUT_BUFFER_SIZE];
+    RTC_TimeTypeDef rtc_time;
+    HAL_RTC_GetTime(&rtc, &rtc_time, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&rtc, NULL, RTC_FORMAT_BIN); // must be called to unlock time values
 
-        RTC_TimeTypeDef rtc_time;
-        HAL_RTC_GetTime(&rtc, &rtc_time, RTC_FORMAT_BIN);
-        HAL_RTC_GetDate(&rtc, NULL, RTC_FORMAT_BIN); // must be called to unlock time values
+    uint16_t millis = (uint16_t)(999.0 - 1000.0 / rtc_time.SecondFraction * rtc_time.SubSeconds);
+    int prefix_len = snprintf(output_buffer, OUT_BUFFER_SIZE, "[%02d:%02d:%02d:%03d] ", rtc_time.Hours, rtc_time.Minutes, rtc_time.Seconds, millis);
 
-        uint16_t millis = (uint16_t)(999.0 - 1000.0 / rtc_time.SecondFraction * rtc_time.SubSeconds);
-        snprintf(output_buffer, OUT_BUFFER_SIZE, "[%02d:%02d:%02d:%03d] ", rtc_time.Hours, rtc_time.Minutes, rtc_time.Seconds, millis);
+    va_list argp;
+    va_start(argp, format);
+    int message_len = vsnprintf(output_buffer + prefix_len, OUT_BUFFER_SIZE - prefix_len, format, argp);
+    va_end(argp);
 
-        va_list argp;
-        va_start(argp, format);
-        char *after_date_q = output_buffer + strlen(output_buffer);
-        uint32_t bytes_left = OUT_BUFFER_SIZE - strlen(output_buffer) - 1;
-        vsnprintf(after_date_q, bytes_left, format, argp);
-        va_end(argp);
+    // ensure we don't overflow the buffer
+    int total_len = prefix_len + message_len;
+    if (total_len > OUT_BUFFER_SIZE - 3)
+    {
+        total_len = OUT_BUFFER_SIZE - 3;
+    }
 
-        // buffer not filled completely, add newline at the end of the string
-        if (strlen(output_buffer) < OUT_BUFFER_SIZE - 3)
-        {
-            output_buffer[strlen(output_buffer)] = '\r';
-            output_buffer[strlen(output_buffer) + 1] = '\n';
-        }
-        // buffer overflowing, add newline at the end of the buffer
-        else
-        {
-            output_buffer[OUT_BUFFER_SIZE - 3] = '\r';
-            output_buffer[OUT_BUFFER_SIZE - 2] = '\n';
-            output_buffer[OUT_BUFFER_SIZE - 1] = '\0';
-        }
+    output_buffer[total_len] = '\r';
+    output_buffer[total_len + 1] = '\n';
+    output_buffer[total_len + 2] = '\0';
 
-        HAL_UART_Transmit(&uart, (uint8_t *)output_buffer, OUT_BUFFER_SIZE, TIMEOUT);
+    if (osMutexAcquire(uart_mutex_id, osWaitForever) == osOK)
+    {
+        HAL_UART_Transmit(&uart, (uint8_t *)output_buffer, total_len + 2, TIMEOUT);
         osMutexRelease(uart_mutex_id);
-    // }
+    }
 }
 
 int _write(int file, char *data, int len)
@@ -109,6 +102,10 @@ int _write(int file, char *data, int len)
     {
         return -1;
     }
-    HAL_UART_Transmit(&uart, (uint8_t *)data, len, TIMEOUT);
+    if (osMutexAcquire(uart_mutex_id, osWaitForever) == osOK)
+    {
+        HAL_UART_Transmit(&uart, (uint8_t *)data, len, TIMEOUT);
+        osMutexRelease(uart_mutex_id);
+    }
     return len;
 }

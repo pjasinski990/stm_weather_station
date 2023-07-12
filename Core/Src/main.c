@@ -9,26 +9,26 @@
 
 void SystemClock_Config(void);
 
+osThreadId_t main_task_handle;
+const osThreadAttr_t main_task_attributes = {
+    .name = "main_task",
+    .stack_size = 512 * 12,
+    .priority = (osPriority_t)osPriorityNormal,
+};
 osThreadId_t sensor_task_handle;
 const osThreadAttr_t sensor_task_attributes = {
     .name = "sensor_task",
-    .stack_size = configMINIMAL_STACK_SIZE + 512 * 8,
+    .stack_size = 512 * 12,
     .priority = (osPriority_t)osPriorityNormal,
 };
 osThreadId_t epaper_task_handle;
 const osThreadAttr_t epaper_task_attributes = {
     .name = "epaper_task",
-    .stack_size = configMINIMAL_STACK_SIZE + 512 * 8,
-    .priority = (osPriority_t)osPriorityHigh,
+    .stack_size = 512 * 12,
+    .priority = (osPriority_t)osPriorityNormal,
 };
 
-int main(void)
-{
-    HAL_Init();
-
-    SystemClock_Config();
-    osKernelInitialize();
-
+void main_task(void *arg) {
     log_init();
     log_write("***********************************");
     log_write("|        Device starting up       |");
@@ -43,10 +43,35 @@ int main(void)
     log_write("starting epaper thread");
     epaper_task_handle = osThreadNew(start_epaper_loop_task, NULL, &epaper_task_attributes);
 
-    /* Start scheduler */
+    while(1) {
+        osDelay(1000);
+    }
+}
+
+int main(void)
+{
+    HAL_Init();
+    SystemClock_Config();
+
+    uint32_t priority_grouping;
+    uint32_t priority_preemption;
+    uint32_t priority_sub;
+    priority_grouping = NVIC_GetPriorityGrouping();
+    NVIC_SetPriorityGrouping(4);
+    priority_preemption = 8;
+    priority_sub = 0;
+    /* Set the priority of the SysTick interrupt */
+    NVIC_SetPriority(SysTick_IRQn, NVIC_EncodePriority(priority_grouping, priority_preemption, priority_sub));
+
+    osKernelInitialize();
+
+    main_task_handle = osThreadNew(main_task, NULL, &main_task_attributes);
+
     osKernelStart();
-    osDelay(osWaitForever);
-    while(1);
+
+    while(1) {
+        osDelay(1000);
+    }
 }
 
 /**

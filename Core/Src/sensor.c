@@ -60,7 +60,7 @@ void app_delay(uint32_t period_us, void *intf_ptr)
 {
     uint32_t period_millis = period_us / 1000u;
     if (period_millis > 0) {
-        HAL_Delay(period_millis);
+        osDelay(period_millis);
     }
 }
 
