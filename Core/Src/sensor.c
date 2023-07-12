@@ -59,7 +59,9 @@ BME68X_INTF_RET_TYPE app_spi_write(uint8_t reg_addr, const uint8_t *reg_data, ui
 void app_delay(uint32_t period_us, void *intf_ptr)
 {
     uint32_t period_millis = period_us / 1000u;
-    osDelay(period_millis);
+    if (period_millis > 0) {
+        HAL_Delay(period_millis);
+    }
 }
 
 
@@ -125,6 +127,10 @@ void sensor_init()
         .name = "sensor_data_queue"
     };
     sensor_data_q = osMessageQueueNew(16, sizeof(sensor_reading_t), &sensor_data_q_attr);
+    if (sensor_data_q == NULL) {
+        log_write("ERROR: sensor data queue could not be created");
+        while (1);
+    }
 
     log_write("sensor OK");
     log_write("");

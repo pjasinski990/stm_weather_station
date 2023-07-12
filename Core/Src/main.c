@@ -5,20 +5,21 @@
 #include "sensor.h"
 #include "epaper.h"
 #include "EPD_Test.h"
+#include "FreeRTOSConfig.h"
 
 void SystemClock_Config(void);
 
 osThreadId_t sensor_task_handle;
 const osThreadAttr_t sensor_task_attributes = {
     .name = "sensor_task",
-    .stack_size = 4096,
+    .stack_size = configMINIMAL_STACK_SIZE + 512 * 8,
     .priority = (osPriority_t)osPriorityNormal,
 };
 osThreadId_t epaper_task_handle;
 const osThreadAttr_t epaper_task_attributes = {
     .name = "epaper_task",
-    .stack_size = 2048,
-    .priority = (osPriority_t)osPriorityNormal,
+    .stack_size = configMINIMAL_STACK_SIZE + 512 * 8,
+    .priority = (osPriority_t)osPriorityHigh,
 };
 
 int main(void)
@@ -42,8 +43,10 @@ int main(void)
     log_write("starting epaper thread");
     epaper_task_handle = osThreadNew(start_epaper_loop_task, NULL, &epaper_task_attributes);
 
-    // /* Start scheduler */
+    /* Start scheduler */
     osKernelStart();
+    osDelay(osWaitForever);
+    while(1);
 }
 
 /**
