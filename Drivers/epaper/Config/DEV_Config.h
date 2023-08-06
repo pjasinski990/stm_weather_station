@@ -48,13 +48,13 @@
 #ifndef _DEV_CONFIG_H_
 #define _DEV_CONFIG_H_
 
+#include <stdint.h>
+#include <stdio.h>
+
 #include "main.h"
 #include "stm32l4xx_hal.h"
 #include "stm32l4xx_hal_gpio.h"
 #include "epaper.h"
-
-#include <stdint.h>
-#include <stdio.h>
 
 /**
  * data

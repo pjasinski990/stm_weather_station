@@ -60,7 +60,7 @@ void app_delay(uint32_t period_us, void *intf_ptr)
 {
     uint32_t period_millis = period_us / 1000u;
     if (period_millis > 0) {
-        osDelay(period_millis);
+        HAL_Delay(period_millis);
     }
 }
 
@@ -220,6 +220,9 @@ uint32_t config_load(uint8_t *config_buffer, uint32_t n_buffer)
 }
 
 void start_sensor_loop_task(void *arg) {
+    log_write("sensor initialization");
+    sensor_init();
+
     uint32_t save_intvl = 5u;
     log_write("starting sensor loop:");
     bsec_iot_loop(app_delay, get_timestamp_us, output_ready, state_save, save_intvl);

@@ -87,9 +87,8 @@ Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi_ex.c
 
 ifndef USE_FREERTOS
 C_SOURCES += \
-	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/Source/os_tick_ptim.c \
-	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/Source/os_systick.c \
 	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Config/RTX_Config.c \
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/Source/os_systick.c \
 	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_lib.c \
 	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_system.c \
 	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/rtx_kernel.c \
@@ -201,7 +200,6 @@ C_INCLUDES += \
 	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/Include \
 	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Include \
 	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Config \
-	-IMiddlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Library/IAR/IDE \
 	-IMiddlewares/Third_Party/CMSIS_5/Device/ARM/ARMCM4/Include
 
 else

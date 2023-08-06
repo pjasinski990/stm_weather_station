@@ -14,7 +14,7 @@
 
 SPI_HandleTypeDef epaper_spi_handle;
 
-static UBYTE *frame_buffer;
+UBYTE frame_buffer[sizeof(UBYTE) * EPAPER_N_PIXELS];
 
 void epaper_init() {
     log_write("initalizing epaper");
@@ -81,12 +81,6 @@ void epaper_init() {
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(EPAPER_CS_GPIO_Port, &GPIO_InitStruct);
 
-    frame_buffer = malloc(sizeof(UBYTE) * EPAPER_N_PIXELS);
-    if (frame_buffer == NULL) {
-        log_write("error allocating %d bytes for epaper frame buffer", sizeof(UBYTE) * EPAPER_N_PIXELS);
-        while (1)
-            ;
-    }
     // create, select and clear frame buffer
     Paint_NewImage(frame_buffer, EPD_1IN54_V2_WIDTH, EPD_1IN54_V2_HEIGHT, 270, WHITE);
     Paint_SelectImage(frame_buffer);
@@ -95,11 +89,6 @@ void epaper_init() {
 
     log_write("epaper OK");
     log_write("");
-}
-
-void epaper_deinit() {
-    free(frame_buffer);
-    frame_buffer = NULL;
 }
 
 // wake epaper for writing
@@ -140,7 +129,8 @@ void epaper_draw_text(uint8_t xbegin, uint8_t ybegin, sFONT *font, const char *t
 
 #include "weather_icons_32x32.h"
 void start_epaper_loop_task(void *arg) {
-    log_write("starting epaper task");
+    log_write("epaper initialization");
+    epaper_init();
 
     int border = 0;
     int n_icons = 4;
@@ -150,6 +140,7 @@ void start_epaper_loop_task(void *arg) {
     int values_x = border + icon_dim + icon_padding_right;
     sFONT font = Font12;
 
+    log_write("starting epaper task");
     while (1) {
         epaper_begin();
         Paint_Clear(WHITE);
