@@ -42,21 +42,15 @@ void main_task(void *arg) {
         log_write("Error creating sensor task!");
     }
     epaper_task_handle = osThreadNew(start_epaper_loop_task, NULL, &epaper_task_attributes);
-    if (sensor_task_handle == NULL) {
+    if (epaper_task_handle == NULL) {
         log_write("Error creating epaper task!");
     }
 
-    while(1) {
-        osDelay(osWaitForever);
-    }
+    osThreadExit();
 }
 
 int main(void)
 {
-    // NVIC_SetPriority(SVCall_IRQn, 7U);
-    // NVIC_SetPriority(SysTick_IRQn, 7U);
-    // NVIC_SetPriority(PendSV_IRQn, 6U);
-
     HAL_Init();
 
     SystemClock_Config();

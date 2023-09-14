@@ -123,8 +123,7 @@ startup_stm32l476xx.s
 
 ifndef USE_FREERTOS
 ASM_SOURCES +=  \
-test.s
-# Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/RTX/Source/GCC/irq_armv7m.s
+	Middlewares/Third_Party/CMSIS_5/CMSIS/RTOS2/Source/irq_armv7m_rtx.s
 endif
 
 

@@ -73,11 +73,7 @@ void HAL_MspInit(void)
   /* PendSV_IRQn interrupt configuration */
   #ifdef USE_FREERTOS
   HAL_NVIC_SetPriority(PendSV_IRQn, 15, 0);
-  #else
-  // RTX5 uses different priorities than FreeRTOS
-  HAL_NVIC_SetPriority(PendSV_IRQn, 15U, 0);
   #endif
-
   /* USER CODE BEGIN MspInit 1 */
 
   /* USER CODE END MspInit 1 */
